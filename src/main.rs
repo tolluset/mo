@@ -4,10 +4,9 @@ use ctrlc;
 use std::fs::{self, OpenOptions};
 use std::io::{self, BufRead, BufReader, Write};
 use std::process::exit;
-use std::sync::{mpsc, Arc, Mutex};
-use std::thread;
-#[derive(Debug)]
+use std::sync::{Arc, Mutex};
 
+#[derive(Debug)]
 struct Memo {
     id: String,
     title: String,
@@ -20,11 +19,9 @@ fn main() {
     let memos = Arc::new(Mutex::new(load_from_file()));
     let memos_clone = Arc::clone(&memos);
 
-    let (tx, rx) = mpsc::channel::<()>();
-
     ctrlc::set_handler(move || {
         println!("Interrupted");
-        let memos = memos.lock().unwrap();
+        let memos = memos_clone.lock().unwrap();
         save_to_file(&memos);
         exit(0);
     })
